@@ -122,23 +122,23 @@ namespace RectangleCount
                 Console.WriteLine(rowStrB);
             }
 
-            // Console.WriteLine();
-            // Console.WriteLine();
-            // Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
 
-            // j = 0;
-            // for (int i = maxCoord; i >= 0; i--)
-            // {
-            //     StringBuilder rowStrB = new StringBuilder("                                    ", maxCoord + 1);
+            j = 0;
+            for (int i = maxCoord; i >= 0; i--)
+            {
+                StringBuilder rowStrB = new StringBuilder("                                    ", maxCoord + 1);
 
-            //     while (j < points.Count && points[j].Y == i)
-            //     {
-            //         rowStrB.Remove(3 * points[j].X, 3);
-            //         rowStrB.Insert(3 * points[j].X, " + ");
-            //         j++;
-            //     }
-            //     Console.WriteLine(rowStrB);
-            // }
+                while (j < points.Count && points[j].Y == i)
+                {
+                    rowStrB.Remove(3 * points[j].X, 3);
+                    rowStrB.Insert(3 * points[j].X, " + ");
+                    j++;
+                }
+                Console.WriteLine(rowStrB);
+            }
 
             Console.WriteLine();
 
