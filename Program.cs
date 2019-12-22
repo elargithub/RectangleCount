@@ -21,8 +21,6 @@ namespace RectangleCount
 
             InitDistinctDescendingPoints(pointsCount);
 
-
-
             points.Clear();
 
             points.Add(new Point(3, 5));
@@ -55,12 +53,10 @@ namespace RectangleCount
                                 if (bl.Y == br.Y && bl.X == tl.X)
                                 {
                                     rectsCount++;
-                                    // Console.WriteLine(tl + " " + tr);
-                                    // Console.WriteLine(bl + " " + br);
-                                    // PlotRects(new List<Point> { tl, tr, bl, br });
+                                    
                                     if (rectsCount < 18)
                                     {
-                                        ListOfSbLists[0]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[0]/*sbList*/);
+                                        ListOfSbLists[0]  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[0]);
                                     }
                                     if (rectsCount == 18)
                                     {
@@ -68,7 +64,7 @@ namespace RectangleCount
                                     }
                                     if (rectsCount >= 18 && rectsCount < 36)
                                     {
-                                        ListOfSbLists[1]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[1]/*sbList*/);
+                                        ListOfSbLists[1]  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[1]);
                                     }
                                     break;
                                 }
@@ -78,10 +74,10 @@ namespace RectangleCount
                 }
             }
 
-            if (ListOfSbLists[0]/*sbList*/[0].Length > 1)
+            if (ListOfSbLists[0][0].Length > 1)
                 foreach (var SBList in ListOfSbLists)
                 {
-                    foreach (var sb in SBList/*sbList*/)
+                    foreach (var sb in SBList)
                         Console.WriteLine(sb);
 
                     Console.WriteLine();
