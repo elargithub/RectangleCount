@@ -21,6 +21,17 @@ namespace RectangleCount
 
             InitDistinctDescendingPoints(pointsCount);
 
+
+
+            points.Clear();
+
+            points.Add(new Point(3, 5));
+            points.Add(new Point(2, 4));
+            points.Add(new Point(4, 4));
+            points.Add(new Point(3, 3));
+            points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
+            pointsCount = points.Count();
+
             PlotToConsole();
 
             InitNextListStringBuilder();
@@ -75,7 +86,88 @@ namespace RectangleCount
 
                     Console.WriteLine();
                 }
-            Console.WriteLine("No. of rects: " + rectsCount);
+
+
+            Console.WriteLine("no of rects: " + rectsCount);
+
+
+            List<StringBuilder> sbList = new List<StringBuilder>();
+            for (int i = 0; i < 5 + maxYCoord; i++)
+            {
+                sbList.Add(new StringBuilder(" "));
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Oblique rectc ");
+            rectsCount = 0;
+            sbList.Clear();
+
+            for (int i = 0; i < 5 + maxYCoord; i++)
+            {
+                sbList.Add(new StringBuilder(" "));
+            }
+
+            for (int i = 0; i < pointsCount - 3; i++)
+            {
+                Point tr = points[i];// top-right
+                for (int j = i + 1; j < pointsCount; j++)
+                {
+                    Point tl = points[j];// top-left
+                    if (tr.X > tl.X)
+                    {
+                        // def top side coord diff
+                        int DxT = tl.X - tr.X;
+                        int DyT = tl.Y - tr.Y;
+
+                        for (int k = j + 1; k < pointsCount; k++)
+                        {
+                            Point bl = points[k];// bottom-left
+                            if (tl.Y > bl.Y)
+                            {
+                                // def left side coord diff 
+                                int DxL = bl.X - tl.X;
+                                int DyL = bl.Y - tl.Y;
+
+                                // check for perpendicularity top and left side
+
+                                for (int l = k + 1; l < pointsCount; l++)
+                                {
+                                    Point br = points[l];// bottom-right
+                                    if (br.X < tr.X)
+                                    {
+                                        // def bottom side coord diff  
+                                        int DxB = bl.X - br.X;
+                                        int DyB = bl.Y - br.Y;
+                                        // def right side coord diff 
+                                        int DxR = br.X - tr.X;
+                                        int DyR = br.Y - tr.Y;
+
+                                        // check for paralellism T-B, L-R   
+
+                                        if (DxB == DxT && DyB == DyT && DxR == DxL && DyR == DyL)
+                                        {
+                                            rectsCount++;
+                                            if (rectsCount < 12)
+                                            {
+                                                sbList = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, sbList);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (sbList[0].Length > 1)
+                foreach (var sb in sbList)
+                    Console.WriteLine(sb);
+
+
+            Console.WriteLine("No. of oblique rects: " + rectsCount);
+
         }
 
         private static void InitNextListStringBuilder()
