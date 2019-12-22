@@ -10,44 +10,55 @@ namespace RectangleCount
     {
         static Random rand = new Random();
         static List<Point> points;
-        static int maxCoord = 10;
+        static int maxXCoord = 9 + 0;
+        static int maxYCoord = 5;
+
+        static List<List<StringBuilder>> ListOfSbLists = new List<List<StringBuilder>>();
         static void Main(string[] args)
         {
-            int pointsCount = 4 + rand.Next(50 - 4);
+            int pointsCount = 4 + 25;//rand.Next(25 - 4);
             int rectsCount = 0;
 
             InitDistinctDescendingPoints(pointsCount);
 
             PlotToConsole();
 
+            InitNextListStringBuilder();
+
             for (int i = 0; i < pointsCount - 3; i++)
             {
-                Point ru = points[i];// right upper
+                Point tr = points[i];// top-right
                 for (int j = i + 1; j < pointsCount - 2; j++)
                 {
-                    Point lu = points[j];//left upper
-                    if (ru.Y != lu.Y)
+                    Point tl = points[j];// top-left
+                    if (tr.Y != tl.Y)
                         break;
                     for (int k = j + 1; k < pointsCount - 1; k++)
                     {
-                        Point rl = points[k];// right lower
-                        // if (ru.X > rl.X)
-                        //     break;
-                        // if (ru.X < rl.X)
-                        //     continue;
-
-                        if (ru.X == rl.X)
+                        Point br = points[k];// bottom-right
+                        if (tr.X == br.X)
                         {
                             for (int l = k + 1; l < pointsCount; l++)
                             {
-                                Point ll = points[l];// left lower
-                                if (ll.Y == rl.Y && ll.X == lu.X)
+                                Point bl = points[l];// bottom-left
+                                if (bl.Y == br.Y && bl.X == tl.X)
                                 {
                                     rectsCount++;
-                                    Console.WriteLine(lu + "  " + ru);
-                                    Console.WriteLine(ll + "  " + rl);
-                                    Console.WriteLine();
-
+                                    // Console.WriteLine(tl + " " + tr);
+                                    // Console.WriteLine(bl + " " + br);
+                                    // PlotRects(new List<Point> { tl, tr, bl, br });
+                                    if (rectsCount < 18)
+                                    {
+                                        ListOfSbLists[0]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[0]/*sbList*/);
+                                    }
+                                    if (rectsCount == 18)
+                                    {
+                                        InitNextListStringBuilder();
+                                    }
+                                    if (rectsCount >= 18 && rectsCount < 36)
+                                    {
+                                        ListOfSbLists[1]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[1]/*sbList*/);
+                                    }
                                     break;
                                 }
                             }
@@ -56,19 +67,27 @@ namespace RectangleCount
                 }
             }
 
-            Console.WriteLine("no of rects: " + rectsCount);
+            if (ListOfSbLists[0]/*sbList*/[0].Length > 1)
+                foreach (var SBList in ListOfSbLists)
+                {
+                    foreach (var sb in SBList/*sbList*/)
+                        Console.WriteLine(sb);
+
+                    Console.WriteLine();
+                }
+            Console.WriteLine("No. of rects: " + rectsCount);
         }
 
-        private static List<Point> InitPoints(int pointsCount)
+        private static void InitNextListStringBuilder()
         {
-            List<Point> points = new List<Point>();
-            for (int i = 0; i < pointsCount; i++)
+            List<StringBuilder> sbList = new List<StringBuilder>();
+            for (int i = 0; i < 5 + maxYCoord; i++)
             {
-                points.Add(new Point(rand.Next(10), rand.Next(10)));
+                sbList.Add(new StringBuilder(" "));
             }
-
-            return points;
+            ListOfSbLists.Add(sbList);
         }
+
         private static void InitDistinctDescendingPoints(int pointsCount)
         {
             points = new List<Point>();
@@ -77,7 +96,7 @@ namespace RectangleCount
                 Point newP;
                 do
                 {
-                    newP = new Point(rand.Next(maxCoord + 1), rand.Next(maxCoord + 1));
+                    newP = new Point(rand.Next(maxXCoord + 1), rand.Next(maxYCoord + 1));
                 } while (IsDuplicate(points, newP));
 
                 points.Add(newP);
@@ -85,7 +104,6 @@ namespace RectangleCount
             points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
 
         }
-
         private static bool IsDuplicate(List<Point> points, Point newP)
         {
             foreach (var item in points)
@@ -98,50 +116,85 @@ namespace RectangleCount
         private static void PlotToConsole()
         {
             Console.WriteLine();
-            foreach (var item in points)
-            {
-                Console.WriteLine(item);
-            }
 
             int prevY = points[0].Y;
+            List<Point> pointsWithSameY = new List<Point>();
+            foreach (var p in points)
+            {
+                if (p.Y != prevY)
+                {
+                    PlotPointRow(prevY, pointsWithSameY);
+                    pointsWithSameY.Clear();
+                    prevY = p.Y;
+                }
+                pointsWithSameY.Add(p);
+            }
+            PlotPointRow(prevY, pointsWithSameY);
 
-            // stringbuffer rowStr = "OOOOOOOOOO";
-            // string rowStr = "----------";
+            PlotRects(points);
+
+            Console.WriteLine();
+
+        }
+        private static void PlotPointRow(int prevY, List<Point> pointsWithSameY)
+        {
+            pointsWithSameY.Reverse();
+            StringBuilder pRow = new StringBuilder(prevY + " : ");
+            foreach (var pWithSameY in pointsWithSameY)
+            {
+                pRow.Append(pWithSameY.X + "; ");
+            }
+            Console.WriteLine(pRow);
+        }
+        private static void PlotRects(List<Point> ps)
+        {
+            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            Console.WriteLine(borderStr);
+            int j = 0;
+            for (int i = maxYCoord; i >= 0; i--)
+            {
+                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
+
+                while (j < ps.Count && ps[j].Y == i)
+                {
+                    rowStrB.Remove(ps[j].X + 1, 1);
+                    rowStrB.Insert(ps[j].X + 1, "+");
+                    j++;
+                }
+                Console.WriteLine(rowStrB);
+            }
+            Console.WriteLine(borderStr);
+            Console.WriteLine();
+        }
+        private static List<StringBuilder> PlotRectsToSbList(List<Point> ps, List<StringBuilder> sbList)
+        {
+            Point tl = ps[0];// top-left
+            Point tr = ps[1];// top-right
+            Point bl = ps[2];// bottom-left
+            Point br = ps[3];// bottom-right
+
+            sbList[0].Append(" (" + tl.X + "," + tl.Y + ")" + "(" + tr.X + "," + tr.Y + ") ");
+            sbList[1].Append(" (" + bl.X + "," + bl.Y + ")" + "(" + br.X + "," + br.Y + ") ");
+
+            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            sbList[2].Append(borderStr);
 
             int j = 0;
-            for (int i = maxCoord; i >= 0; i--)
+            for (int i = maxYCoord; i >= 0; i--)
             {
-                StringBuilder rowStrB = new StringBuilder("            ", maxCoord + 1);//"OOOOOOOOOOO", maxCoord + 1);
+                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
 
-                while (j < points.Count && points[j].Y == i)
+                while (j < ps.Count && ps[j].Y == i)
                 {
-                    rowStrB.Remove(points[j].X, 1);
-                    rowStrB.Insert(points[j].X, "+");
+                    rowStrB.Remove(ps[j].X + 1, 1);
+                    rowStrB.Insert(ps[j].X + 1, "+");
                     j++;
                 }
-                Console.WriteLine(rowStrB);
+                sbList[3 + maxYCoord - i].Append(rowStrB);
             }
+            sbList[4 + maxYCoord].Append(borderStr);
 
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-
-            j = 0;
-            for (int i = maxCoord; i >= 0; i--)
-            {
-                StringBuilder rowStrB = new StringBuilder("                                    ", maxCoord + 1);
-
-                while (j < points.Count && points[j].Y == i)
-                {
-                    rowStrB.Remove(3 * points[j].X, 3);
-                    rowStrB.Insert(3 * points[j].X, " + ");
-                    j++;
-                }
-                Console.WriteLine(rowStrB);
-            }
-
-            Console.WriteLine();
-
+            return sbList;
         }
     }
 }
