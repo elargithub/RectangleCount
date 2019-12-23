@@ -16,15 +16,33 @@ namespace RectangleCount
         static List<List<StringBuilder>> ListOfSbLists = new List<List<StringBuilder>>();
         static void Main(string[] args)
         {
-            int pointsCount = 4 + 25;//rand.Next(25 - 4);
+            int pointsCount = 4 + 20;//rand.Next(25 - 4);
             int rectsCount = 0;
 
             InitDistinctDescendingPoints(pointsCount);
 
-            PlotToConsole();
+            // Init test points 
+            // points.Clear(); 
 
-            InitNextListStringBuilder();
+            // points.Add(new Point(3, 5));
 
+            // points.Add(new Point(2, 5));
+            // points.Add(new Point(4, 5));
+
+            // points.Add(new Point(2, 4));
+            // points.Add(new Point(4, 4));
+            // points.Add(new Point(3, 3));
+
+            // points.Add(new Point(5, 3));
+            // points.Add(new Point(4, 2));            
+
+            // points.Add(new Point(5, 1));
+            // points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
+            // pointsCount = points.Count();
+
+            PlotPointsToConsole();
+
+            // Finding the rects only with horizontal and vertical sides
             for (int i = 0; i < pointsCount - 3; i++)
             {
                 Point tr = points[i];// top-right
@@ -43,22 +61,14 @@ namespace RectangleCount
                                 Point bl = points[l];// bottom-left
                                 if (bl.Y == br.Y && bl.X == tl.X)
                                 {
-                                    rectsCount++;
-                                    // Console.WriteLine(tl + " " + tr);
-                                    // Console.WriteLine(bl + " " + br);
-                                    // PlotRects(new List<Point> { tl, tr, bl, br });
-                                    if (rectsCount < 18)
-                                    {
-                                        ListOfSbLists[0]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[0]/*sbList*/);
-                                    }
-                                    if (rectsCount == 18)
-                                    {
+                                    if (rectsCount % 17 == 0)
                                         InitNextListStringBuilder();
-                                    }
-                                    if (rectsCount >= 18 && rectsCount < 36)
-                                    {
-                                        ListOfSbLists[1]/*sbList*/  = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[1]/*sbList*/);
-                                    }
+
+                                    int indx = rectsCount / 17;
+                                    ListOfSbLists[indx] = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[indx], false);
+
+                                    rectsCount++;
+
                                     break;
                                 }
                             }
@@ -67,25 +77,69 @@ namespace RectangleCount
                 }
             }
 
-            if (ListOfSbLists[0]/*sbList*/[0].Length > 1)
-                foreach (var SBList in ListOfSbLists)
-                {
-                    foreach (var sb in SBList/*sbList*/)
-                        Console.WriteLine(sb);
+            PlotResults(rectsCount, "");
 
-                    Console.WriteLine();
-                }
-            Console.WriteLine("No. of rects: " + rectsCount);
-        }
+            ListOfSbLists.Clear();
+            rectsCount = 0;
 
-        private static void InitNextListStringBuilder()
-        {
-            List<StringBuilder> sbList = new List<StringBuilder>();
-            for (int i = 0; i < 5 + maxYCoord; i++)
+            // Finding all rects
+            for (int i = 0; i < pointsCount - 3; i++)
             {
-                sbList.Add(new StringBuilder(" "));
+                Point tr = points[i];// top-right
+                for (int j = i + 1; j < pointsCount - 1; j++)
+                {
+                    Point tl = points[j];// top-left
+                    if (tr.X > tl.X)
+                    {
+                        // def top side coord diff
+                        int DxT = tl.X - tr.X;
+                        int DyT = tl.Y - tr.Y;
+
+                        for (int k = j + 1; k < pointsCount; k++)
+                        {
+                            Point bl = points[k];// bottom-left
+                            if (tl.Y > bl.Y)
+                            {
+                                // def left side coord diff 
+                                int DxL = bl.X - tl.X;
+                                int DyL = bl.Y - tl.Y;
+
+                                // check for perpendicularity top and left side
+
+                                for (int l = j + 1; l < pointsCount; l++)
+                                {
+                                    Point br = points[l];// bottom-right
+                                    // if (br.X < tr.X)
+                                    {
+                                        // def bottom side coord diff  
+                                        int DxB = bl.X - br.X;
+                                        int DyB = bl.Y - br.Y;
+                                        // def right side coord diff 
+                                        int DxR = br.X - tr.X;
+                                        int DyR = br.Y - tr.Y;
+
+                                        // check for paralellism T-B, L-R   
+                                        if (DxB == DxT && DyB == DyT && DxR == DxL && DyR == DyL)
+                                        {
+                                            if (rectsCount % 17 == 0)
+                                                InitNextListStringBuilder();
+
+                                            int indx = rectsCount / 17;
+                                            ListOfSbLists[indx] = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[indx], true);
+
+                                            rectsCount++;
+
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            ListOfSbLists.Add(sbList);
+
+            PlotResults(rectsCount);
         }
 
         private static void InitDistinctDescendingPoints(int pointsCount)
@@ -113,7 +167,16 @@ namespace RectangleCount
             }
             return false;
         }
-        private static void PlotToConsole()
+        private static void InitNextListStringBuilder()
+        {
+            List<StringBuilder> sbList = new List<StringBuilder>();
+            for (int i = 0; i < 5 + maxYCoord; i++)
+            {
+                sbList.Add(new StringBuilder(" "));
+            }
+            ListOfSbLists.Add(sbList);
+        }
+        private static void PlotPointsToConsole()
         {
             Console.WriteLine();
 
@@ -123,20 +186,22 @@ namespace RectangleCount
             {
                 if (p.Y != prevY)
                 {
-                    PlotPointRow(prevY, pointsWithSameY);
+                    WritePointRow(prevY, pointsWithSameY);
                     pointsWithSameY.Clear();
                     prevY = p.Y;
                 }
                 pointsWithSameY.Add(p);
             }
-            PlotPointRow(prevY, pointsWithSameY);
 
-            PlotRects(points);
-
+            WritePointRow(prevY, pointsWithSameY);
+            
             Console.WriteLine();
 
+            PlotPoints(points);
+
+            Console.WriteLine();
         }
-        private static void PlotPointRow(int prevY, List<Point> pointsWithSameY)
+        private static void WritePointRow(int prevY, List<Point> pointsWithSameY)
         {
             pointsWithSameY.Reverse();
             StringBuilder pRow = new StringBuilder(prevY + " : ");
@@ -146,27 +211,22 @@ namespace RectangleCount
             }
             Console.WriteLine(pRow);
         }
-        private static void PlotRects(List<Point> ps)
+        private static void PlotPoints(List<Point> ps)
         {
-            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            string borderStr = GetRowStr('-');
             Console.WriteLine(borderStr);
             int j = 0;
-            for (int i = maxYCoord; i >= 0; i--)
+            for (int y = maxYCoord; y >= 0; y--)
             {
-                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
+                StringBuilder rowStrB = new StringBuilder(GetRowStr(' '));
 
-                while (j < ps.Count && ps[j].Y == i)
-                {
-                    rowStrB.Remove(ps[j].X + 1, 1);
-                    rowStrB.Insert(ps[j].X + 1, "+");
-                    j++;
-                }
+                GetRowStringBuilder(ref j, y, ps, rowStrB);
                 Console.WriteLine(rowStrB);
             }
             Console.WriteLine(borderStr);
             Console.WriteLine();
         }
-        private static List<StringBuilder> PlotRectsToSbList(List<Point> ps, List<StringBuilder> sbList)
+        private static List<StringBuilder> PlotRectsToSbList(List<Point> ps, List<StringBuilder> sbList, bool IsRotd)
         {
             Point tl = ps[0];// top-left
             Point tr = ps[1];// top-right
@@ -176,25 +236,63 @@ namespace RectangleCount
             sbList[0].Append(" (" + tl.X + "," + tl.Y + ")" + "(" + tr.X + "," + tr.Y + ") ");
             sbList[1].Append(" (" + bl.X + "," + bl.Y + ")" + "(" + br.X + "," + br.Y + ") ");
 
-            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            string borderStr = GetRowStr('-');
             sbList[2].Append(borderStr);
 
             int j = 0;
-            for (int i = maxYCoord; i >= 0; i--)
+            for (int y = maxYCoord; y >= 0; y--)
             {
-                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
+                StringBuilder rowStrB = new StringBuilder(GetRowStr(' '));
 
-                while (j < ps.Count && ps[j].Y == i)
-                {
-                    rowStrB.Remove(ps[j].X + 1, 1);
-                    rowStrB.Insert(ps[j].X + 1, "+");
-                    j++;
-                }
-                sbList[3 + maxYCoord - i].Append(rowStrB);
+                sbList[3 + maxYCoord - y].Append(IsRotd ? GetRowStringBuilder(y, ps, rowStrB) : GetRowStringBuilder(ref j, y, ps, rowStrB));
             }
             sbList[4 + maxYCoord].Append(borderStr);
 
             return sbList;
+        }
+        private static string GetRowStr(char chr = ' ')
+        {
+            return "|" + new String(chr, maxXCoord + 1) + "|"; ;
+        }
+        private static StringBuilder GetRowStringBuilder(ref int j, int y, List<Point> ps, StringBuilder rowStrB)
+        {
+            while (j < ps.Count && ps[j].Y == y)
+            {
+                SetStringBuilder(ps[j], rowStrB);
+                j++;
+            }
+            return rowStrB;
+        }
+        private static StringBuilder GetRowStringBuilder(int y, List<Point> ps, StringBuilder rowStrB)
+        {
+            foreach (var p in ps)
+            {
+                if (p.Y == y)
+                {
+                    SetStringBuilder(p, rowStrB);
+                }
+            }
+            return rowStrB;
+        }
+        private static void SetStringBuilder(Point p, StringBuilder sb)
+        {
+            sb.Remove(p.X + 1, 1);
+            sb.Insert(p.X + 1, "+");
+        }
+        private static void PlotResults(int rectsCount, string kind = "Oblique")
+        {
+            Console.WriteLine();
+            Console.WriteLine($"-------------------  {kind} Rects No.: {rectsCount}  -------------------");
+            Console.WriteLine();
+
+            if (ListOfSbLists.Count > 0 && ListOfSbLists[0][0].Length > 1)
+                foreach (var SBList in ListOfSbLists)
+                {
+                    foreach (var sb in SBList)
+                        Console.WriteLine(sb);
+
+                    Console.WriteLine();
+                }
         }
     }
 }
