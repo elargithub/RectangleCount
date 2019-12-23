@@ -16,7 +16,7 @@ namespace RectangleCount
         static List<List<StringBuilder>> ListOfSbLists = new List<List<StringBuilder>>();
         static void Main(string[] args)
         {
-            int pointsCount = 4 + 6;//rand.Next(25 - 4);
+            int pointsCount = 4 + 10;//rand.Next(25 - 4);
             int rectsCount = 0;
 
             InitDistinctDescendingPoints(pointsCount);
@@ -86,9 +86,6 @@ namespace RectangleCount
 
             PlotRes(rectsCount, "");
 
-
-            Console.WriteLine();
-            Console.WriteLine("Oblique rectc ");
             ListOfSbLists.Clear();
             rectsCount = 0;
 
@@ -163,16 +160,6 @@ namespace RectangleCount
             PlotRes(rectsCount);
         }
 
-        private static void InitNextListStringBuilder()
-        {
-            List<StringBuilder> sbList = new List<StringBuilder>();
-            for (int i = 0; i < 5 + maxYCoord; i++)
-            {
-                sbList.Add(new StringBuilder(" "));
-            }
-            ListOfSbLists.Add(sbList);
-        }
-
         private static void InitDistinctDescendingPoints(int pointsCount)
         {
             points = new List<Point>();
@@ -197,6 +184,15 @@ namespace RectangleCount
                     return true;
             }
             return false;
+        }
+        private static void InitNextListStringBuilder()
+        {
+            List<StringBuilder> sbList = new List<StringBuilder>();
+            for (int i = 0; i < 5 + maxYCoord; i++)
+            {
+                sbList.Add(new StringBuilder(" "));
+            }
+            ListOfSbLists.Add(sbList);
         }
         private static void PlotToConsole()
         {
@@ -233,19 +229,14 @@ namespace RectangleCount
         }
         private static void PlotRects(List<Point> ps)
         {
-            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            string borderStr = GetRowStr('-');
             Console.WriteLine(borderStr);
             int j = 0;
-            for (int i = maxYCoord; i >= 0; i--)
+            for (int y = maxYCoord; y >= 0; y--)
             {
-                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
+                StringBuilder rowStrB = new StringBuilder(GetRowStr(' '));
 
-                while (j < ps.Count && ps[j].Y == i)
-                {
-                    rowStrB.Remove(ps[j].X + 1, 1);
-                    rowStrB.Insert(ps[j].X + 1, "+");
-                    j++;
-                }
+                GetRowStrB(ref j, y, ps, rowStrB);
                 Console.WriteLine(rowStrB);
             }
             Console.WriteLine(borderStr);
@@ -261,19 +252,23 @@ namespace RectangleCount
             sbList[0].Append(" (" + tl.X + "," + tl.Y + ")" + "(" + tr.X + "," + tr.Y + ") ");
             sbList[1].Append(" (" + bl.X + "," + bl.Y + ")" + "(" + br.X + "," + br.Y + ") ");
 
-            string borderStr = "|" + new String('-', maxXCoord + 1) + "|";
+            string borderStr = GetRowStr('-');
             sbList[2].Append(borderStr);
 
             int j = 0;
             for (int y = maxYCoord; y >= 0; y--)
             {
-                StringBuilder rowStrB = new StringBuilder("|" + new String(' ', maxXCoord + 1) + "|", maxXCoord + 3);
+                StringBuilder rowStrB = new StringBuilder(GetRowStr(' '));
 
                 sbList[3 + maxYCoord - y].Append(IsRotd ? GetRowStrB(y, ps, rowStrB) : GetRowStrB(ref j, y, ps, rowStrB));
             }
             sbList[4 + maxYCoord].Append(borderStr);
 
             return sbList;
+        }
+        private static string GetRowStr(char chr = ' ')
+        {
+            return "|" + new String(chr, maxXCoord + 1) + "|"; ;
         }
         private static StringBuilder GetRowStrB(ref int j, int y, List<Point> ps, StringBuilder rowStrB)
         {
@@ -295,15 +290,16 @@ namespace RectangleCount
             }
             return rowStrB;
         }
-        private static StringBuilder SetStringBuilder(Point p, StringBuilder sb)
+        private static void SetStringBuilder(Point p, StringBuilder sb)
         {
             sb.Remove(p.X + 1, 1);
             sb.Insert(p.X + 1, "+");
-            return sb;
         }
-
-        private static void PlotRes(int rectsCount, string kind = "oblique")
+        private static void PlotRes(int rectsCount, string kind = "Oblique")
         {
+            Console.WriteLine();
+            Console.WriteLine($"-------------------  {kind} Rects No.: {rectsCount}-------------------");
+
             if (ListOfSbLists.Count > 0 && ListOfSbLists[0][0].Length > 1)
                 foreach (var SBList in ListOfSbLists)
                 {
@@ -312,8 +308,6 @@ namespace RectangleCount
 
                     Console.WriteLine();
                 }
-
-            Console.WriteLine($"No. of {kind} rects: " + rectsCount);
         }
     }
 }
