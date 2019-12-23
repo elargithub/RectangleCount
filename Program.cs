@@ -22,65 +22,32 @@ namespace RectangleCount
             InitDistinctDescendingPoints(pointsCount);
 
             // Init test points 
-            // points.Clear(); 
+            points.Clear(); 
 
-            // points.Add(new Point(3, 5));
+            points.Add(new Point(3, 5));
 
-            // points.Add(new Point(2, 5));
-            // points.Add(new Point(4, 5));
+            points.Add(new Point(2, 5));
+            points.Add(new Point(4, 5));
 
-            // points.Add(new Point(2, 4));
-            // points.Add(new Point(4, 4));
-            // points.Add(new Point(3, 3));
+            points.Add(new Point(2, 4));
+            points.Add(new Point(4, 4));
+            points.Add(new Point(3, 3));
+
+            // points.Add(new Point(2, 3));         
+            // points.Add(new Point(2, 1));
 
             // points.Add(new Point(5, 3));
             // points.Add(new Point(4, 2));            
 
             // points.Add(new Point(5, 1));
-            // points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
-            // pointsCount = points.Count();
+
+            // points.Add(new Point(2, 2));            
+
+            // points.Add(new Point(1, 1));
+            points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
+            pointsCount = points.Count();
 
             PlotPointsToConsole();
-
-            // Finding the rects only with horizontal and vertical sides
-            for (int i = 0; i < pointsCount - 3; i++)
-            {
-                Point tr = points[i];// top-right
-                for (int j = i + 1; j < pointsCount - 2; j++)
-                {
-                    Point tl = points[j];// top-left
-                    if (tr.Y != tl.Y)
-                        break;
-                    for (int k = j + 1; k < pointsCount - 1; k++)
-                    {
-                        Point br = points[k];// bottom-right
-                        if (tr.X == br.X)
-                        {
-                            for (int l = k + 1; l < pointsCount; l++)
-                            {
-                                Point bl = points[l];// bottom-left
-                                if (bl.Y == br.Y && bl.X == tl.X)
-                                {
-                                    if (rectsCount % 17 == 0)
-                                        InitNextListStringBuilder();
-
-                                    int indx = rectsCount / 17;
-                                    ListOfSbLists[indx] = PlotRectsToSbList(new List<Point> { tl, tr, bl, br }, ListOfSbLists[indx], false);
-
-                                    rectsCount++;
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            PlotResults(rectsCount, "");
-
-            ListOfSbLists.Clear();
-            rectsCount = 0;
 
             // Finding all rects
             for (int i = 0; i < pointsCount - 3; i++)
@@ -103,6 +70,16 @@ namespace RectangleCount
                                 // def left side coord diff 
                                 int DxL = bl.X - tl.X;
                                 int DyL = bl.Y - tl.Y;
+
+                                // check that top and left side not on the same line
+                                if ((DyL != 0 && DyT != 0 && DxL / DyL == DxT / DyT)
+                                    || (DxL != 0 && DxT != 0 && DyL / DxL == DyT / DxT)
+                                    // || (DxL == 0 && DxT == 0)
+                                    // || (DxL == 0 && DxT == 0)
+                                    // || (DyL == 0 && DyT == 0)
+                                    // || (DyL != 0 && DyT == 0)
+                                    )
+                                    continue;
 
                                 // check for perpendicularity top and left side
 
@@ -194,7 +171,7 @@ namespace RectangleCount
             }
 
             WritePointRow(prevY, pointsWithSameY);
-            
+
             Console.WriteLine();
 
             PlotPoints(points);
@@ -279,7 +256,7 @@ namespace RectangleCount
             sb.Remove(p.X + 1, 1);
             sb.Insert(p.X + 1, "+");
         }
-        private static void PlotResults(int rectsCount, string kind = "Oblique")
+        private static void PlotResults(int rectsCount, string kind = "All")
         {
             Console.WriteLine();
             Console.WriteLine($"-------------------  {kind} Rects No.: {rectsCount}  -------------------");
