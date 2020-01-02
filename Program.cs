@@ -15,7 +15,6 @@ namespace RectangleCount
         Square,
         HorizSquare,
         DiagSquare
-
     }
     class Program
     {
@@ -23,31 +22,22 @@ namespace RectangleCount
         static List<Point> points;
         static int maxXCoord = 9 + 0;
         static int maxYCoord = 5;
-
-        // static List<List<StringBuilder>> ListOfSbLists_Parallgrms = new List<List<StringBuilder>>();
-        // static List<List<StringBuilder>> ListOfSbLists_HorizRects = new List<List<StringBuilder>>();
-        // static List<List<StringBuilder>> ListOfSbLists_DiagRects = new List<List<StringBuilder>>();
         static List<List<StringBuilder>>[] ListOfSbLists;
+
         static void Main(string[] args)
         {
             int quadrilateralTypesCount = Enum.GetNames(typeof(Quadrilateral)).Length;
             ListOfSbLists = new List<List<StringBuilder>>[quadrilateralTypesCount];
             for (int type = 0; type < quadrilateralTypesCount; type++)
             {
-                ListOfSbLists[type] = new List<List<StringBuilder>>(); ;
+                ListOfSbLists[type] = new List<List<StringBuilder>>();
             }
 
-            int pointsCount = 4 + 20;//rand.Next(25 - 4);
+            int pointsCount = 4 + 14;//rand.Next(25 - 4);
             int[] quadrilateralsCount = new int[quadrilateralTypesCount];
 
-            // int paralelogramsCount = 0;
-            // int horizRectsCount = 0;
-            // int diagRectsCount = 0;
-
             InitPoints(pointsCount);
-
-            // InitTestPoints(2);
-            // pointsCount = points.Count();
+            // InitTestPoints(2); pointsCount = points.Count();
 
             PlotPointsToConsole();
 
@@ -85,37 +75,10 @@ namespace RectangleCount
                             // right side coord diff 
                             int DxR = b2.X - t1.X;
                             int DyR = b2.Y - t1.Y;
-
-                            int indx = 0;
+                            
                             // check for paralellism T-B, L-R   
                             if (DxB == DxT && DyB == DyT && DxR == DxL && DyR == DyL)
                             {
-                                // if (paralelogramsCount % 17 == 0)
-                                //     InitNextListStringBuilder(ListOfSbLists_Parallgrms);
-
-                                // indx = paralelogramsCount / 17;
-                                // ListOfSbLists_Parallgrms[indx] = PlotRectsToSbList(new List<Point> { t2, t1, b1, b2 }, ListOfSbLists_Parallgrms[indx], true);
-                                // paralelogramsCount++;
-
-
-                                // if ((DyT == 0 && DxL == 0) || (DxT == 0 && DyL == 0))
-                                // {
-                                //     if (horizRectsCount % 17 == 0)
-                                //         InitNextListStringBuilder(ListOfSbLists_HorizRects);
-                                //     indx = horizRectsCount / 17;
-                                //     ListOfSbLists_HorizRects[indx] = PlotRectsToSbList(new List<Point> { t2, t1, b1, b2 }, ListOfSbLists_HorizRects[indx], true);
-                                //     horizRectsCount++;
-                                // }
-                                // else if ((DyL != 0 && DxT != 0 && (DxL / DyL) * (DxL / DyL) == (DyT / DxT) * (DyT / DxT)) ||
-                                //          (DxL != 0 && DyT != 0 && (DyL / DxL) * (DyL / DxL) == (DxT / DyT) * (DxT / DyT)))// perpendicularity check
-                                // {
-                                //     if (diagRectsCount % 17 == 0)
-                                //         InitNextListStringBuilder(ListOfSbLists_DiagRects);
-                                //     indx = diagRectsCount / 17;
-                                //     ListOfSbLists_DiagRects[indx] = PlotRectsToSbList(new List<Point> { t2, t1, b1, b2 }, ListOfSbLists_DiagRects[indx], true);
-                                //     diagRectsCount++;
-                                // }
-
                                 for (int type = 0; type < quadrilateralTypesCount; type++)
                                 {
                                     if (IsType(type, DxT, DyT, DxL, DyL))
@@ -123,7 +86,7 @@ namespace RectangleCount
                                         if (quadrilateralsCount[type] % 17 == 0)
                                             InitNextListStringBuilder(ListOfSbLists[type]);
 
-                                        indx = quadrilateralsCount[type] / 17;
+                                        int indx = quadrilateralsCount[type] / 17;
                                         ListOfSbLists[type][indx] = PlotRectsToSbList(new List<Point> { t2, t1, b1, b2 }, ListOfSbLists[type][indx], true);
                                         quadrilateralsCount[type]++;
                                     }
@@ -136,17 +99,13 @@ namespace RectangleCount
                 }
             }
 
-            // PlotResults(paralelogramsCount, ListOfSbLists_Parallgrms, "Paralelograms");
-            // PlotResults(horizRectsCount, ListOfSbLists_HorizRects, "HorizRects");
-            // PlotResults(diagRectsCount, ListOfSbLists_DiagRects, "DiagRects");
-
             for (int type = 0; type < quadrilateralTypesCount; type++)
             {
                 PlotResults(quadrilateralsCount[type], ListOfSbLists[type], ((Quadrilateral)type).ToString());
             }
         }
 
-        // Init list of  distinct descending points 
+        // Initialize list of distinct descending points 
         private static void InitPoints(int pointsCount)
         {
             points = new List<Point>();
@@ -156,21 +115,22 @@ namespace RectangleCount
                 do
                 {
                     newP = new Point(rand.Next(maxXCoord + 1), rand.Next(maxYCoord + 1));
-                } while (IsDuplicate(points, newP));
+                } while (IsDuplicate(newP));
 
                 points.Add(newP);
             }
             points = points.OrderByDescending(p => p.Y).ThenByDescending(p => p.X).ToList();
 
-        }
-        private static bool IsDuplicate(List<Point> points, Point newP)
-        {
-            foreach (var item in points)
+            //C# 7.0, local function
+            bool IsDuplicate(Point newP)
             {
-                if (item == newP)
-                    return true;
+                foreach (var item in points)
+                {
+                    if (item == newP)
+                        return true;
+                }
+                return false;
             }
-            return false;
         }
         private static void InitNextListStringBuilder(List<List<StringBuilder>> listOfSbLists)
         {
@@ -306,31 +266,36 @@ namespace RectangleCount
                 case Quadrilateral.Parallelgrm:
                     return true;
                 case Quadrilateral.HorizRect:
-                    return IsHorizontal(DxT, DyT, DxL, DyL);
+                    return IsHorizontal();
                 case Quadrilateral.DiagRect:
-                    return !IsHorizontal(DxT, DyT, DxL, DyL) && IsPerpendicular(DxT, DyT, DxL, DyL);
+                    return !IsHorizontal() && IsPerpendicular();
                 case Quadrilateral.Square:
-                    return IsEqualSided(DxT, DyT, DxL, DyL) && IsPerpendicular(DxT, DyT, DxL, DyL);
+                    return IsEqualSided() && IsPerpendicular();
                 case Quadrilateral.HorizSquare:
-                    return IsEqualSided(DxT, DyT, DxL, DyL) && IsPerpendicular(DxT, DyT, DxL, DyL) && IsHorizontal(DxT, DyT, DxL, DyL);
+                    return IsEqualSided() && IsPerpendicular() && IsHorizontal();
                 case Quadrilateral.DiagSquare:
-                    return IsEqualSided(DxT, DyT, DxL, DyL) && IsPerpendicular(DxT, DyT, DxL, DyL) && !IsHorizontal(DxT, DyT, DxL, DyL);
+                    return IsEqualSided() && IsPerpendicular() && !IsHorizontal();
                 default:
                     return false;
             }
-        }
-        private static bool IsHorizontal(int DxT, int DyT, int DxL, int DyL)
-        {
-            return (DyT == 0 && DxL == 0) || (DxT == 0 && DyL == 0);
-        }
-        private static bool IsPerpendicular(int DxT, int DyT, int DxL, int DyL)
-        {
-            return ((DyL != 0 && DxT != 0 && Math.Abs(DxL / (double)DyL) == Math.Abs(DyT / (double)DxT)) ||
-                    (DxL != 0 && DyT != 0 && Math.Abs(DyL / (double)DxL) == Math.Abs(DxT / (double)DyT)));
-        }
-        private static bool IsEqualSided(int DxT, int DyT, int DxL, int DyL)
-        {
-            return Math.Abs(DxT) == Math.Abs(DyL) && Math.Abs(DyT) == Math.Abs(DxL);
+
+            //C# 7.0, local functions
+            bool IsHorizontal()
+            {
+                return (DyT == 0 && DxL == 0) || (DxT == 0 && DyL == 0);
+            }
+
+            bool IsPerpendicular()
+            {
+                return ((DyL != 0 && DxT != 0 && Math.Abs(DxL / (double)DyL) == Math.Abs(DyT / (double)DxT)) ||
+                        (DxL != 0 && DyT != 0 && Math.Abs(DyL / (double)DxL) == Math.Abs(DxT / (double)DyT)));
+            }
+            
+            bool IsEqualSided()
+            {
+                return Math.Abs(DxT) == Math.Abs(DyL) && Math.Abs(DyT) == Math.Abs(DxL);
+            }
+
         }
         private static void InitTestPoints(int testCase)
         {
